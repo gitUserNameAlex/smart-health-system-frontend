@@ -17,7 +17,6 @@ export interface IUser {
 
 export interface IUserStore {
   fetchUser(token: string): Promise<void>;
-  fetchMetrics(token: string): Promise<void>;
   userName: string | undefined;
   isUserLoading: boolean;
   isMetricsLoading: boolean;

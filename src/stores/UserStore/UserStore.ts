@@ -26,19 +26,6 @@ export class UserStore implements IUserStore {
     }
   }
 
-  async fetchMetrics(token: string): Promise<void> {
-    this.error = null;
-
-    try {
-      const response = await axios.get(`${BASE_URL}/user/${token}/chart/heart-rate/flow/`);
-      console.log(response.data);
-      this.metricsLoadingStage = 'success';
-    } catch (err) {
-      this.error = (err as Error).message || 'Ошибка при выполнении запроса';
-      this.metricsLoadingStage = 'error';
-    }
-  }
-
   get userName(): string | undefined {
     return this.user?.FCs;
   }

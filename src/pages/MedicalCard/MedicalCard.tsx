@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite';
 import { useNavigate } from 'react-router-dom';
 
 import { Button, Typography } from '@mui/material';
+import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { LineChart } from '@mui/x-charts';
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
@@ -17,10 +18,13 @@ import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined
 import s from './MedicalCard.module.scss';
 import { useRootStore } from 'stores/RootStore';
 import LoadingPage from 'pages/LoadingPage';
+import { BASE_URL } from 'config/api';
 import { TOKEN_DEFAULT } from 'config/token';
 
 const MedicalCard: React.FC = () => {
   const { userStore } = useRootStore();
+
+  const [heartData, setHeartData] = React.useState<any[]>([]);
 
   const navigate = useNavigate();
 
@@ -29,10 +33,38 @@ const MedicalCard: React.FC = () => {
   };
 
   React.useEffect(() => {
-    userStore.fetchMetrics(TOKEN_DEFAULT);
-  }, [userStore]);
+    const fetchData = async () => {
+      await fetchEventSource(`${BASE_URL}/user/${TOKEN_DEFAULT}/chart/heart-rate/flow/`, {
+        method: 'GET',
+        headers: {
+          Accept: 'text/event-stream',
+        },
+        onopen: async res => {
+          if (res.ok && res.status === 200) {
+            console.log('Connection made ', res);
+          } else if (res.status >= 400 && res.status < 500 && res.status !== 429) {
+            console.log('Client side error ', res);
+          }
+        },
+        onmessage(event) {
+          console.log(event.data);
+          const parsedData = JSON.parse(event.data);
+          setHeartData(data => [...data, parsedData]);
+        },
+        onclose() {
+          console.log('Connection closed by the server');
+        },
+        onerror(err) {
+          console.log('There was an error from server', err);
+        },
+      });
+    };
+    fetchData();
 
-  if (userStore.isUserLoading || userStore.isMetricsLoading) {
+    console.log(heartData);
+  }, [heartData]);
+
+  if (userStore.isUserLoading) {
     return <LoadingPage />;
   }
 
