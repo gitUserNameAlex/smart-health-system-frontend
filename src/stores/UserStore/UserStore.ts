@@ -2,13 +2,13 @@ import { makeAutoObservable } from 'mobx';
 import axios from 'axios';
 import { BASE_URL } from 'config/api';
 import { IUser, IUserStore } from './types';
+import dayjs, { Dayjs } from 'dayjs';
 
 export class UserStore implements IUserStore {
   user: IUser | null = null;
   doctor: IUser | null = null;
   userLoadingStage: string = 'loading';
   doctorLoadingStage: string = 'loading';
-  metricsLoadingStage: string = 'loading';
   error: string | null = null;
 
   constructor() {
@@ -45,6 +45,10 @@ export class UserStore implements IUserStore {
     return this.user?.FCs;
   }
 
+  get userInfo(): IUser | null {
+    return this.user;
+  }
+
   get doctorInfo(): IUser | null {
     return this.doctor;
   }
@@ -53,7 +57,18 @@ export class UserStore implements IUserStore {
     return this.userLoadingStage === 'loading';
   }
 
-  get isMetricsLoading(): boolean {
-    return this.metricsLoadingStage === 'loading';
+  get isDoctorLoading(): boolean {
+    return this.doctorLoadingStage === 'loading';
+  }
+
+  getTaskDescription(date: Dayjs): string {
+    const selectedDate = date.startOf('day');
+    const specialDate = dayjs('2024-11-17').startOf('day');
+
+    if (selectedDate.isSame(specialDate)) {
+      return 'аспирин 2 раза в сутки';
+    }
+
+    return 'Рецептов на этот день нет';
   }
 }

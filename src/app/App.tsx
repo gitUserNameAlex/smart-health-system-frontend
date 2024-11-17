@@ -5,8 +5,8 @@ import MedicalCard from 'pages/MedicalCard';
 import Authorization from 'pages/Authorization';
 import { createTheme, ThemeProvider } from '@mui/material';
 import DoctorInfo from 'pages/DoctorInfo';
-import Calendar from 'pages/Calendar';
 import { RootStoreProvider } from 'stores/RootStore';
+import CalendarPage from 'pages/Calendar/CalendarPage';
 
 const theme = createTheme({
   palette: {
@@ -23,7 +23,7 @@ const theme = createTheme({
     },
     error: {
       main: '#F0B9BF',
-      light: '#B5C8F3',
+      light: '#CAD8F9',
       dark: '#ACF4F4',
     },
   },
@@ -42,7 +42,7 @@ const App: React.FC = () => {
             <Route path="/" element={<Authorization />} />
             <Route path="/medical-card" element={<MedicalCard />} />
             <Route path="/doctor-info" element={<DoctorInfo />} />
-            <Route path="/calendar" element={<Calendar />} />
+            <Route path="/calendar" element={<CalendarPage />} />
           </Routes>
         </BrowserRouter>
       </ThemeProvider>

@@ -1,8 +1,7 @@
 import * as React from 'react';
 
 import { observer } from 'mobx-react-lite';
-import { Button, Typography } from '@mui/material';
-
+import { Box, Button, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
@@ -13,11 +12,19 @@ import LocalHospitalOutlinedIcon from '@mui/icons-material/LocalHospitalOutlined
 import MarkChatUnreadOutlinedIcon from '@mui/icons-material/MarkChatUnreadOutlined';
 import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
 
-import s from './Calendar.module.scss';
+import s from './CalendarPage.module.scss';
 import { useRootStore } from 'stores/RootStore';
+import { StaticDatePicker } from '@mui/x-date-pickers';
 import LoadingPage from 'pages/LoadingPage';
+import dayjs, { Dayjs } from 'dayjs';
 
-const Calendar: React.FC = () => {
+const CalendarPage: React.FC = () => {
+  const [selectedDate, setSelectedDate] = React.useState<Dayjs | null>(dayjs());
+
+  const handleDateChange = (date: Dayjs | null) => {
+    setSelectedDate(date);
+  };
+
   const { userStore } = useRootStore();
 
   const navigate = useNavigate();
@@ -25,6 +32,10 @@ const Calendar: React.FC = () => {
   const openTelegramBot = () => {
     window.open('https://t.me/myHealthTula_bot', '_blank', 'noopener,noreferrer');
   };
+
+  const taskDescription = React.useMemo(() => {
+    return selectedDate ? userStore.getTaskDescription(selectedDate) : null;
+  }, [selectedDate, userStore]);
 
   if (userStore.isUserLoading) {
     return <LoadingPage />;
@@ -45,7 +56,32 @@ const Calendar: React.FC = () => {
         </div>
       </div>
 
-      <div className={s.calendar__content}></div>
+      <div className={s.calendar__content}>
+        <StaticDatePicker displayStaticWrapperAs="desktop" value={selectedDate} onChange={handleDateChange} />
+
+        {selectedDate && (
+          <Box
+            className={s.calendar__recipe}
+            sx={{
+              bgcolor: 'error.light',
+              width: '90vw',
+              borderRadius: '20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px',
+              alignItems: 'center',
+              padding: '15px',
+            }}
+          >
+            <Typography variant="h6" align="center" sx={{ color: 'primary.main' }}>
+              Рецепт на {selectedDate.format('DD.MM.YYYY')}:
+            </Typography>
+            <Typography variant="body1" align="center" sx={{ color: 'primary.main' }}>
+              {taskDescription}
+            </Typography>
+          </Box>
+        )}
+      </div>
 
       <div className={s['calendar__footer-container']}>
         <div className={s.calendar__footer}>
@@ -81,4 +117,4 @@ const Calendar: React.FC = () => {
   );
 };
 
-export default observer(Calendar);
+export default observer(CalendarPage);

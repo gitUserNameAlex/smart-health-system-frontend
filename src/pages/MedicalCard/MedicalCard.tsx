@@ -85,7 +85,7 @@ const MedicalCard: React.FC = () => {
       },
       onmessage(event) {
         const parsedData = JSON.parse(event.data);
-        setPressureData(parsedData.values);
+        setPressureData(parsedData.values.map((newVal: number) => newVal / 7.7));
         setPressureTS(parsedData.values.map((_: number, idx: number) => idx));
       },
       onclose() {

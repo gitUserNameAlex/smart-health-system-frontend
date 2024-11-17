@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { observer } from 'mobx-react-lite';
 
-import { Button, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -17,6 +17,7 @@ import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined
 import s from './DoctorInfo.module.scss';
 import { useRootStore } from 'stores/RootStore';
 import LoadingPage from 'pages/LoadingPage';
+import { TOKEN_DEFAULT } from 'config/token';
 
 const DoctorInfo: React.FC = () => {
   const { userStore } = useRootStore();
@@ -27,9 +28,15 @@ const DoctorInfo: React.FC = () => {
     window.open('https://t.me/myHealthTula_bot', '_blank', 'noopener,noreferrer');
   };
 
-  if (userStore.isUserLoading) {
+  React.useEffect(() => {
+    userStore.fetchDoctor(TOKEN_DEFAULT);
+  }, [userStore]);
+
+  if (userStore.isDoctorLoading) {
     return <LoadingPage />;
   }
+
+  console.log(userStore.doctorInfo);
 
   return (
     <div className={s.doctor}>
@@ -46,7 +53,36 @@ const DoctorInfo: React.FC = () => {
         </div>
       </div>
 
-      <div className={s.doctor__content}></div>
+      <div className={s.doctor__content}>
+        <Box
+          sx={{
+            bgcolor: 'error.light',
+            width: '90vw',
+            borderRadius: '20px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '30px',
+            alignItems: 'center',
+            padding: '15px',
+          }}
+        >
+          <Typography variant="h5" sx={{ color: 'primary.main' }}>
+            {userStore.doctorInfo?.FCs}
+          </Typography>
+          <Typography variant="h6" align="center" sx={{ color: 'primary.main' }}>
+            Телефон: {userStore.doctorInfo?.phone}
+          </Typography>
+          <Typography variant="h6" align="center" sx={{ color: 'primary.main' }}>
+            Почта: {userStore.doctorInfo?.email}
+          </Typography>
+          <Typography variant="h6" align="center" sx={{ color: 'primary.main' }}>
+            Адрес больницы: {userStore.doctorInfo?.hospital_address}
+          </Typography>
+          <Typography variant="h6" align="center" sx={{ color: 'primary.main' }}>
+            Степень: {userStore.doctorInfo?.expiriance}
+          </Typography>
+        </Box>
+      </div>
 
       <div className={s['doctor__footer-container']}>
         <div className={s.doctor__footer}>
