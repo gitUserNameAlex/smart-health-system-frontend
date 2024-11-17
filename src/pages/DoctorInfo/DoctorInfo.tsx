@@ -72,11 +72,9 @@ const DoctorInfo: React.FC = () => {
             <Typography sx={{ color: 'secondary.light', textTransform: 'initial' }}>Чат</Typography>
           </Button>
 
-          <Button sx={{ display: 'flex', flexDirection: 'column' }}>
+          <Button sx={{ display: 'flex', flexDirection: 'column' }} onClick={() => navigate('/calendar')}>
             <CalendarTodayOutlinedIcon sx={{ color: 'secondary.light' }} />
-            <Typography sx={{ color: 'secondary.light', textTransform: 'initial' }} onClick={() => navigate('/calendar')}>
-              Календарь
-            </Typography>
+            <Typography sx={{ color: 'secondary.light', textTransform: 'initial' }}>Календарь</Typography>
           </Button>
         </div>
       </div>

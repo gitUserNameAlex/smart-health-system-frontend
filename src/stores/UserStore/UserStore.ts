@@ -5,7 +5,9 @@ import { IUser, IUserStore } from './types';
 
 export class UserStore implements IUserStore {
   user: IUser | null = null;
+  doctor: IUser | null = null;
   userLoadingStage: string = 'loading';
+  doctorLoadingStage: string = 'loading';
   metricsLoadingStage: string = 'loading';
   error: string | null = null;
 
@@ -26,8 +28,25 @@ export class UserStore implements IUserStore {
     }
   }
 
+  async fetchDoctor(token: string): Promise<void> {
+    this.error = null;
+
+    try {
+      const response = await axios.get(`${BASE_URL}/user/${token}/get_doctor/`);
+      this.doctor = response.data;
+      this.doctorLoadingStage = 'success';
+    } catch (err) {
+      this.error = (err as Error).message || 'Ошибка при выполнении запроса';
+      this.doctorLoadingStage = 'error';
+    }
+  }
+
   get userName(): string | undefined {
     return this.user?.FCs;
+  }
+
+  get doctorInfo(): IUser | null {
+    return this.doctor;
   }
 
   get isUserLoading(): boolean {

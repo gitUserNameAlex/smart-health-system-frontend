@@ -20,7 +20,7 @@ const Authorization: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const [role, setRole] = React.useState<string>('doctor');
+  const [role, setRole] = React.useState<string>('patient');
 
   const handleLogin = (): void => {
     userStore.fetchUser(TOKEN_DEFAULT);

@@ -22,9 +22,16 @@ import { BASE_URL } from 'config/api';
 import { TOKEN_DEFAULT } from 'config/token';
 
 const MedicalCard: React.FC = () => {
-  const { userStore } = useRootStore();
+  const [heartData, setHeartData] = React.useState<number[]>([]);
+  const [heartTS, setHeartTS] = React.useState<string[]>([]);
 
-  const [heartData, setHeartData] = React.useState<any[]>([]);
+  const [pressureData, setPressureData] = React.useState<number[]>([]);
+  const [pressureTS, setPressureTS] = React.useState<string[]>([]);
+
+  const [spoData, setSpoData] = React.useState<number[]>([]);
+  const [spoTS, setSpoTS] = React.useState<string[]>([]);
+
+  const { userStore } = useRootStore();
 
   const navigate = useNavigate();
 
@@ -33,36 +40,94 @@ const MedicalCard: React.FC = () => {
   };
 
   React.useEffect(() => {
-    const fetchData = async () => {
-      await fetchEventSource(`${BASE_URL}/user/${TOKEN_DEFAULT}/chart/heart-rate/flow/`, {
-        method: 'GET',
-        headers: {
-          Accept: 'text/event-stream',
-        },
-        onopen: async res => {
-          if (res.ok && res.status === 200) {
-            console.log('Connection made ', res);
-          } else if (res.status >= 400 && res.status < 500 && res.status !== 429) {
-            console.log('Client side error ', res);
-          }
-        },
-        onmessage(event) {
-          console.log(event.data);
-          const parsedData = JSON.parse(event.data);
-          setHeartData(data => [...data, parsedData]);
-        },
-        onclose() {
-          console.log('Connection closed by the server');
-        },
-        onerror(err) {
-          console.log('There was an error from server', err);
-        },
-      });
-    };
-    fetchData();
+    const controller1 = new AbortController();
+    const controller2 = new AbortController();
+    const controller3 = new AbortController();
 
-    console.log(heartData);
-  }, [heartData]);
+    fetchEventSource(`${BASE_URL}/user/${TOKEN_DEFAULT}/chart/heart-rate/flow/`, {
+      method: 'GET',
+      headers: {
+        Accept: 'text/event-stream',
+      },
+      signal: controller1.signal,
+      async onopen(res) {
+        if (res.ok && res.status === 200) {
+          console.log('Connection made ', res);
+        } else if (res.status >= 400 && res.status < 500 && res.status !== 429) {
+          console.log('Client side error ', res);
+        }
+      },
+      onmessage(event) {
+        const parsedData = JSON.parse(event.data);
+        setHeartData(parsedData.values);
+        setHeartTS(parsedData.values.map((_: number, idx: number) => idx));
+      },
+      onclose() {
+        console.log('Connection closed by the server');
+      },
+      onerror(err) {
+        console.log('There was an error from server', err);
+      },
+    });
+
+    fetchEventSource(`${BASE_URL}/user/${TOKEN_DEFAULT}/chart/pressure/flow/`, {
+      method: 'GET',
+      headers: {
+        Accept: 'text/event-stream',
+      },
+      signal: controller2.signal,
+      async onopen(res) {
+        if (res.ok && res.status === 200) {
+          console.log('Connection made ', res);
+        } else if (res.status >= 400 && res.status < 500 && res.status !== 429) {
+          console.log('Client side error ', res);
+        }
+      },
+      onmessage(event) {
+        const parsedData = JSON.parse(event.data);
+        setPressureData(parsedData.values);
+        setPressureTS(parsedData.values.map((_: number, idx: number) => idx));
+      },
+      onclose() {
+        console.log('Connection closed by the server');
+      },
+      onerror(err) {
+        console.log('There was an error from server', err);
+      },
+    });
+
+    fetchEventSource(`${BASE_URL}/user/${TOKEN_DEFAULT}/chart/spo2/flow/`, {
+      method: 'GET',
+      headers: {
+        Accept: 'text/event-stream',
+      },
+      signal: controller3.signal,
+      async onopen(res) {
+        if (res.ok && res.status === 200) {
+          console.log('Connection made ', res);
+        } else if (res.status >= 400 && res.status < 500 && res.status !== 429) {
+          console.log('Client side error ', res);
+        }
+      },
+      onmessage(event) {
+        const parsedData = JSON.parse(event.data);
+        setSpoData(parsedData.values);
+        setSpoTS(parsedData.values.map((_: number, idx: number) => idx));
+      },
+      onclose() {
+        console.log('Connection closed by the server');
+      },
+      onerror(err) {
+        console.log('There was an error from server', err);
+      },
+    });
+
+    return () => {
+      controller1.abort();
+      controller2.abort();
+      controller3.abort();
+    };
+  }, []);
 
   if (userStore.isUserLoading) {
     return <LoadingPage />;
@@ -86,15 +151,24 @@ const MedicalCard: React.FC = () => {
 
         <div className={s.card__content}>
           <div className={s['card__content-item']}>
-            <Typography color="secondary.contrastText" variant="h5">
+            <Typography
+              color="secondary.contrastText"
+              sx={{
+                width: '70vw',
+                borderRadius: '30px',
+                display: 'flex',
+                justifyContent: 'center',
+                backgroundColor: 'error.main',
+              }}
+              variant="h5"
+            >
               Сердечный ритм
             </Typography>
             <LineChart
-              xAxis={[{ data: [0, 1, 2, 3, 5, 8, 10] }]}
+              xAxis={[{ data: heartTS }]}
               series={[
                 {
-                  data: [0, 2, 5.5, 2, 8.5, 1.5, 5],
-                  area: true,
+                  data: heartData,
                   color: '#C13041',
                   curve: 'linear',
                 },
@@ -106,15 +180,24 @@ const MedicalCard: React.FC = () => {
           </div>
 
           <div className={s['card__content-item']}>
-            <Typography color="primary.main" variant="h5">
+            <Typography
+              color="primary.main"
+              variant="h5"
+              sx={{
+                width: '70vw',
+                borderRadius: '30px',
+                display: 'flex',
+                justifyContent: 'center',
+                backgroundColor: 'error.light',
+              }}
+            >
               Давление
             </Typography>
             <LineChart
-              xAxis={[{ data: [0, 1, 2, 3, 5, 8, 10] }]}
+              xAxis={[{ data: pressureTS }]}
               series={[
                 {
-                  data: [0, 2, 5.5, 2, 8.5, 1.5, 5],
-                  area: true,
+                  data: pressureData,
                   color: '#2155CD',
                   curve: 'linear',
                 },
@@ -126,15 +209,24 @@ const MedicalCard: React.FC = () => {
           </div>
 
           <div className={s['card__content-item']}>
-            <Typography color="primary.light" variant="h5">
+            <Typography
+              color="primary.light"
+              variant="h5"
+              sx={{
+                width: '70vw',
+                borderRadius: '30px',
+                display: 'flex',
+                justifyContent: 'center',
+                backgroundColor: 'error.dark',
+              }}
+            >
               Кислород в крови
             </Typography>
             <LineChart
-              xAxis={[{ data: [0, 1, 2, 3, 5, 8, 10] }]}
+              xAxis={[{ data: spoTS }]}
               series={[
                 {
-                  data: [0, 2, 5.5, 2, 8.5, 1.5, 5],
-                  area: true,
+                  data: spoData,
                   curve: 'linear',
                 },
               ]}

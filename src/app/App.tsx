@@ -21,6 +21,11 @@ const theme = createTheme({
       contrastText: '#C13041',
       dark: '#FFFFFF',
     },
+    error: {
+      main: '#F0B9BF',
+      light: '#B5C8F3',
+      dark: '#ACF4F4',
+    },
   },
   typography: {
     fontFamily: 'Nunito Sans, sans-serif',
